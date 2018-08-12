@@ -1,11 +1,15 @@
 package com.ubs.opsit.interviews;
 
-import org.jbehave.core.annotations.Then;
-import org.jbehave.core.annotations.When;
-import org.junit.Test;
-
 import static com.ubs.opsit.interviews.support.BehaviouralTestEmbedder.aBehaviouralTestRunner;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.jbehave.core.annotations.Then;
+import org.jbehave.core.annotations.When;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.ubs.opsit.utility.TimeConverterUtil;
 
 /**
  * Acceptance test class that uses the JBehave (Gerkin) syntax for writing stories.  You should not need to
@@ -13,24 +17,59 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class BerlinClockFixture {
 
-    private TimeConverter berlinClock;
-    private String theTime;
+	private TimeConverter berlinClock;
+	private String theTime;
 
-    @Test
-    public void berlinClockAcceptanceTests() throws Exception {
-        aBehaviouralTestRunner()
-                .usingStepsFrom(this)
-                .withStory("berlin-clock.story")
-                .run();
-    }
+	@Before
+	public void init(){
+		berlinClock = new TimeConverterImpl();
+	}
 
-    @When("the time is $time")
-    public void whenTheTimeIs(String time) {
-        theTime = time;
-    }
+	@Test
+	public void berlinClockAcceptanceTests() throws Exception {
+		aBehaviouralTestRunner()
+		.usingStepsFrom(this)
+		.withStory("berlin-clock.story")
+		.run();
+	}
 
-    @Then("the clock should look like $")
-    public void thenTheClockShouldLookLike(String theExpectedBerlinClockOutput) {
-        assertThat(berlinClock.convertTime(theTime)).isEqualTo(theExpectedBerlinClockOutput);
-    }
+	@When("the time is $time")
+	public void whenTheTimeIs(String time) {
+		theTime = time;
+	}
+
+	@Then("the clock should look like $")
+	public void thenTheClockShouldLookLike(String theExpectedBerlinClockOutput) {
+		assertThat(berlinClock.convertTime(theTime)).isEqualTo(theExpectedBerlinClockOutput);
+	}
+
+	@Test
+	public void testGetSymbolsForSeconds_odd(){
+		String expected = "O\r\n";
+		Assert.assertEquals(expected, TimeConverterUtil.getSymbolsForSeconds(5));
+	}
+
+	@Test
+	public void testGetSymbolsForSeconds_even(){
+		String expected = "Y\r\n";
+		Assert.assertEquals(expected, TimeConverterUtil.getSymbolsForSeconds(4));
+	}
+
+	@Test
+	public void testGetSymbolsForHours(){
+		String expected = "RROO\r\nRRRO\r\n";
+		Assert.assertEquals(expected, TimeConverterUtil.getSymbolsForHours(13));
+	}
+	@Test
+	public void testGetSymbolsForMinutes(){
+		String expected = "YYOOOOOOOOO\r\nYYYO";
+		Assert.assertEquals(expected, TimeConverterUtil.getSymbolsForMinutes(13));
+	}
+
+	@Test
+	public void testGetSymbolsForMinutes1(){
+		String expected = "YYRYYROOOOO\r\nYYOO";
+		Assert.assertEquals(expected, TimeConverterUtil.getSymbolsForMinutes(32));
+	}
+
 }
